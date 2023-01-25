@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.0.13",
-    "next": "12.2.2",
+    "firebase": "^9.16.0",
+    "next": "^12.2.5",
+    "next-auth": "^4.18.10",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
