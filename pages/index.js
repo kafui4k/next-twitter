@@ -13,25 +13,18 @@ export default function Home({ newsResult, randomUserResults }) {
       </Head>
 
       <main className="flex min-h-screen mx-auto">
-        {/**sidebar */}
         <Sidebar />
 
-        {/**feed */}
         <Feed />
 
-        {/**widget */}
         <Widgets
           newsResults={newsResult.articles}
           randomUserResults={randomUserResults.results}
         />
-
-        {/** Modal */}
       </main>
     </div>
   );
 }
-
-// https://saurav.tech/NewsAPI/top-headlines/category/business/us.json
 
 export async function getServerSideProps() {
   const newsResult = await fetch(
