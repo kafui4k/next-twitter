@@ -92,7 +92,7 @@ function Input() {
             {selectedFile && (
               <div className="relative">
                 <XMarkIcon
-                  className="h-10 text-black absolute cursor-pointer shadow-md shaddow-white rounded-full"
+                  className="border h-10 text-black absolute cursor-pointer shadow-md border-white m-1 rounded-full"
                   onClick={() => setSelectedFile(null)}
                 />
                 <img

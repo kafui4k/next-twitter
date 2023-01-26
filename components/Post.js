@@ -6,6 +6,7 @@ import {
   ShareIcon,
   TrashIcon,
 } from "@heroicons/react/24/outline";
+import Moment from "react-moment";
 
 function Post({ post }) {
   return (
@@ -13,7 +14,7 @@ function Post({ post }) {
       {/**Image */}
       <img
         className="h-11 w-11 rounded-full mr-4"
-        src={post.userImg}
+        src={post.data().userImg}
         alt="user-img"
       />
 
@@ -24,11 +25,13 @@ function Post({ post }) {
           {/**User info */}
           <div className="flex items-center space-x-1 whitespace-nowrap">
             <h4 className="font-bold text-[15px] sm:text-[16px] hover:underline">
-              {post.name}
+              {post.data().name}
             </h4>
-            <span className="text-sm sm:text-[15px]">@{post.username} - </span>
+            <span className="text-sm sm:text-[15px]">
+              @{post.data().username} -{" "}
+            </span>
             <span className="text-sm sm:text-[15px] hover:underline">
-              {post.timestamp}
+              <Moment fromNow>{post?.timestamp?.toDate()}</Moment>
             </span>
           </div>
 
@@ -37,11 +40,15 @@ function Post({ post }) {
         </div>
         {/**post text */}
         <p className="text-gray-800 text-[15px] sm:text-[16px] mb-2">
-          {post.text}
+          {post.data().text}
         </p>
 
         {/** post image */}
-        <img className="rounded-2xl mr-2" src={post.img} alt="post-img" />
+        <img
+          className="rounded-2xl mr-2"
+          src={post.data().image}
+          alt="post-img"
+        />
 
         {/** icons */}
         <div className="flex items-center justify-between text-gray-500 p-2">
