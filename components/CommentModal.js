@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import Modal from "react-modal";
 import { useRecoilState } from "recoil";
 import {
@@ -8,12 +9,19 @@ import {
 } from "@heroicons/react/24/outline";
 import { modalState, postIdState } from "../atom/modalAtom";
 import { db } from "../firebase";
-import { doc, onSnapshot } from "@firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  onSnapshot,
+  serverTimestamp,
+} from "@firebase/firestore";
 import Moment from "react-moment";
 import { useSession } from "next-auth/react";
 
 function CommentModal() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [open, setOpen] = useRecoilState(modalState);
   const [postId, setPostId] = useRecoilState(postIdState);
   const [post, setPost] = useState({});
@@ -25,7 +33,19 @@ function CommentModal() {
     });
   }, [postId]);
 
-  async function sendComment() {}
+  async function sendComment(e) {
+    await addDoc(collection(db, "posts", postId, "comments"), {
+      comment: input,
+      name: session?.user?.name,
+      username: session?.user?.username,
+      userImg: session?.user?.image,
+      timestamp: serverTimestamp(),
+    });
+
+    setOpen(false);
+    setInput("");
+    router.push(`post/${postId}`);
+  }
 
   return (
     <div>
@@ -78,6 +98,7 @@ function CommentModal() {
                     placeholder="Tweet a reply"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
+                    autoFocus
                   ></textarea>
                 </div>
 
