@@ -44,7 +44,7 @@ function CommentModal() {
 
     setOpen(false);
     setInput("");
-    router.push(`post/${postId}`);
+    router.push(`/posts/${postId}`);
   }
 
   return (

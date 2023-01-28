@@ -21,8 +21,10 @@ import {
 import { HeartIcon as HeartIconField } from "@heroicons/react/24/solid";
 import { useRecoilState } from "recoil";
 import { modalState, postIdState } from "../atom/modalAtom";
+import { useRouter } from "next/router";
 
-function Post({ post }) {
+function Post({ post, id }) {
+  const router = useRouter();
   const { data: session } = useSession();
   const [likes, setLikes] = useState([]);
   const [comments, setComments] = useState([]);
@@ -33,14 +35,14 @@ function Post({ post }) {
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
-      collection(db, "posts", post.id, "likes"),
+      collection(db, "posts", id, "likes"),
       (snapshot) => setLikes(snapshot.docs)
     );
   }, []);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(
-      collection(db, "posts", post.id, "comments"),
+      collection(db, "posts", id, "comments"),
       (snapshot) => setComments(snapshot.docs)
     );
   }, []);
@@ -54,9 +56,9 @@ function Post({ post }) {
   const likePost = async () => {
     if (session) {
       if (hasLiked) {
-        await deleteDoc(doc(db, "posts", post.id, "likes", session?.user.uid));
+        await deleteDoc(doc(db, "posts", id, "likes", session?.user.uid));
       } else {
-        await setDoc(doc(db, "posts", post.id, "likes", session?.user.uid), {
+        await setDoc(doc(db, "posts", id, "likes", session?.user.uid), {
           username: session.user.username,
         });
       }
@@ -67,11 +69,13 @@ function Post({ post }) {
 
   const deletePost = async () => {
     if (window.confirm("Are you sure you want to delete this post?")) {
-      deleteDoc(doc(db, "posts", post.id));
+      deleteDoc(doc(db, "posts", id));
 
       if (post.data().image) {
-        deleteObject(ref(storage, `posts/${post.id}/image`));
+        deleteObject(ref(storage, `posts/${id}/image`));
       }
+
+      router.push("/");
     }
   };
 
@@ -79,7 +83,7 @@ function Post({ post }) {
     <div className="flex p-3 cursor-pointer border-b border-gray-200">
       <img
         className="h-11 w-11 rounded-full mr-4"
-        src={post.data().userImg}
+        src={post?.data()?.userImg}
         alt="user-img"
       />
 
@@ -87,13 +91,13 @@ function Post({ post }) {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-1 whitespace-nowrap">
             <h4 className="font-bold text-[15px] sm:text-[16px] hover:underline">
-              {post.data().name}
+              {post?.data()?.name}
             </h4>
             <span className="text-sm sm:text-[15px]">
-              @{post.data().username} -{" "}
+              @{post?.data()?.username} -{" "}
             </span>
             <span className="text-sm sm:text-[15px] hover:underline">
-              <Moment fromNow>{post?.data().timestamp?.toDate()}</Moment>
+              <Moment fromNow>{post?.data()?.timestamp?.toDate()}</Moment>
             </span>
           </div>
 
@@ -101,10 +105,10 @@ function Post({ post }) {
         </div>
 
         <p className="text-gray-800 text-[15px] sm:text-[16px] mb-2">
-          {post.data().text}
+          {post?.data()?.text}
         </p>
 
-        {post.data().image && (
+        {post?.data()?.image && (
           <img
             className="rounded-2xl mr-2"
             src={post.data().image}
@@ -119,7 +123,7 @@ function Post({ post }) {
                 if (!session) {
                   signIn();
                 } else {
-                  setPostId(post.id);
+                  setPostId(id);
                   setOpen(!open);
                 }
               }}
@@ -130,7 +134,7 @@ function Post({ post }) {
             )}
           </div>
 
-          {session?.user?.uid === post?.data().id && (
+          {session?.user?.uid === post?.data()?.id && (
             <TrashIcon
               onClick={deletePost}
               className="h-9 w-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100"
