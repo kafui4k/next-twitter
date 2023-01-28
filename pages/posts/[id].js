@@ -6,18 +6,36 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { useRouter } from "next/router";
 import Post from "../../components/Post";
 import { useEffect, useState } from "react";
-import { doc, onSnapshot } from "@firebase/firestore";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+} from "@firebase/firestore";
 import { db } from "../../firebase";
+import Comment from "../../components/Comment";
 
 function SinglePost({ newsResult, randomUserResults }) {
   const router = useRouter();
   const { id } = router.query;
   const [post, setPost] = useState();
+  const [comments, setComments] = useState([]);
 
   useEffect(
     () => onSnapshot(doc(db, "posts", id), (snapshot) => setPost(snapshot)),
     [id]
   );
+
+  useEffect(() => {
+    onSnapshot(
+      query(
+        collection(db, "posts", id, "comments"),
+        orderBy("timestamp", "desc")
+      ),
+      (snapshot) => setComments(snapshot.docs)
+    );
+  }, [id]);
 
   return (
     <div>
@@ -41,6 +59,20 @@ function SinglePost({ newsResult, randomUserResults }) {
           </div>
 
           <Post id={id} post={post} />
+
+          {comments.length > 0 && (
+            <div className="">
+              {comments.map((comment) => {
+                return (
+                  <Comment
+                    key={comment.id}
+                    id={comment.id}
+                    comment={comment.data()}
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <Widgets
