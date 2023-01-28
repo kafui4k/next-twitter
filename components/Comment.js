@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { signIn, useSession } from "next-auth/react";
 import Moment from "react-moment";
 import {
   collection,
@@ -22,10 +21,11 @@ import { HeartIcon as HeartIconField } from "@heroicons/react/24/solid";
 import { useRecoilState } from "recoil";
 import { modalState, postIdState } from "../atom/modalAtom";
 import { useRouter } from "next/router";
+import { userState } from "../atom/userAtom";
 
 function Comment({ comment, originalPostId, commentId }) {
   const router = useRouter();
-  const { data: session } = useSession();
+  const [currentUser, setCurrentUser] = useRecoilState(userState);
   const [likes, setLikes] = useState([]);
   const [hasLiked, setHasLiked] = useState(false);
   const [hasComment, setHasComment] = useState(false);
@@ -40,13 +40,11 @@ function Comment({ comment, originalPostId, commentId }) {
   }, [commentId, originalPostId]);
 
   useEffect(() => {
-    setHasLiked(
-      likes.findIndex((like) => like.id === session?.user.uid) !== -1
-    );
+    setHasLiked(likes.findIndex((like) => like.id === currentUser?.uid) !== -1);
   }, [likes]);
 
   const likeComment = async () => {
-    if (session) {
+    if (currentUser) {
       if (hasLiked) {
         await deleteDoc(
           doc(
@@ -56,7 +54,7 @@ function Comment({ comment, originalPostId, commentId }) {
             "comments",
             commentId,
             "likes",
-            session?.user.uid
+            currentUser?.uid
           )
         );
       } else {
@@ -68,15 +66,15 @@ function Comment({ comment, originalPostId, commentId }) {
             "comments",
             commentId,
             "likes",
-            session?.user.uid
+            currentUser?.uid
           ),
           {
-            username: session.user.username,
+            username: currentUser?.username,
           }
         );
       }
     } else {
-      signIn();
+      router.push("/auth/signin");
     }
   };
 
@@ -119,8 +117,8 @@ function Comment({ comment, originalPostId, commentId }) {
           <div className="flex items-center select-none">
             <ChatBubbleOvalLeftEllipsisIcon
               onClick={() => {
-                if (!session) {
-                  signIn();
+                if (!currentUser) {
+                  router.push("/auth/signin");
                 } else {
                   setPostId(originalPostId);
                   setOpen(!open);
@@ -130,7 +128,7 @@ function Comment({ comment, originalPostId, commentId }) {
             />
           </div>
 
-          {session?.user?.uid === comment?.userId && (
+          {currentUser?.uid === comment?.userId && (
             <TrashIcon
               onClick={deleteComment}
               className="h-9 w-9 hoverEffect p-2 hover:text-red-600 hover:bg-red-100"
